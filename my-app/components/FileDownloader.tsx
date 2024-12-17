@@ -101,7 +101,7 @@ export function FileDownloader({ initialFiles }: { initialFiles: FileItem[] }) {
         .map(async (file) => {
           const blob = await fetch(file.url).then((r) => r.blob());
           const blobPart = await blob.text();
-          new File([blobPart], file.name, {
+          return new File([blobPart], file.name, {
             type: file.type,
           });
         })
