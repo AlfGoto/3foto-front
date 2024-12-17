@@ -143,9 +143,10 @@ export function FileDownloader({ initialFiles }: { initialFiles: FileItem[] }) {
         >
           Download Selected Files
         </Button>
-        {isMobile && navigator.share && (
-          <Button onClick={shareImages}>Save Images</Button>
-        )}
+        {isMobile &&
+          navigator.share &&
+          files.filter((file) => file.type.startsWith("image/")).length !==
+            0 && <Button onClick={shareImages}>Save Images</Button>}
       </div>
       <ScrollArea className="h-[400px] mt-4">
         <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-4">
