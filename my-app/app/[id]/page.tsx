@@ -21,7 +21,6 @@ async function getFiles(id: string): Promise<FileItem[]> {
   return files;
 }
 
-// eslint-disable-next-line
 export default async function Page({ params }: DownloadPageProps) {
   const { id } = await params;
   const files = await getFiles(id);
