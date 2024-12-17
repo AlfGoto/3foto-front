@@ -18,7 +18,7 @@ interface FileItem {
 }
 
 export function FileDownloader({ initialFiles }: { initialFiles: FileItem[] }) {
-  const [files, setFiles] = useState<FileItem[]>(initialFiles);
+  const [files] = useState<FileItem[]>(initialFiles);
   const [selectedFiles, setSelectedFiles] = useState<string[]>([]);
   const [isDownloading, setIsDownloading] = useState(false);
   const router = useRouter();
