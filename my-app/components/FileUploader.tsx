@@ -88,7 +88,7 @@ export function FileUploader({ apiUrl }: FileUploaderProps) {
 
   return (
     <div className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8">
-      <div className="space-y-4 sm:flex sm:items-center sm:space-y-0 sm:space-x-4">
+      <div className="space-y-4 flex items-end sm:flex sm:space-y-0 sm:space-x-4">
         <div className="w-full sm:w-2/3">
           <Label htmlFor="file" className="block mb-1">
             Choose files
