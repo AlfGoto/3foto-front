@@ -23,6 +23,8 @@ export function FileDownloader({ initialFiles }: { initialFiles: FileItem[] }) {
   const [isDownloading, setIsDownloading] = useState(false);
   const router = useRouter();
 
+  const isMobile = /Mobi|Android|iPhone|iPad|iPod/i.test(navigator.userAgent);
+
   useEffect(() => {
     document.title = "3F DOWN";
   }, []);
@@ -92,6 +94,35 @@ export function FileDownloader({ initialFiles }: { initialFiles: FileItem[] }) {
     );
   }
 
+  async function shareImages() {
+    const imageFiles = files
+      .filter((file) => file.type.startsWith("image/"))
+      .map(
+        (file) =>
+          new File([file as unknown as BlobPart], file.name, {
+            type: file.type,
+          })
+      );
+
+    if (imageFiles.length === 0) {
+      console.warn("No images to share.");
+      return;
+    }
+
+    try {
+      const shareData = {
+        files: imageFiles,
+        title: "Shared Images",
+        text: "Here are some images I'd like to share!",
+      };
+
+      await navigator.share(shareData);
+      console.log("Images shared successfully!");
+    } catch (error) {
+      console.error("Error sharing images:", error);
+    }
+  }
+
   return (
     <div className="max-w-4xl mx-auto mt-10 px-4">
       <h1 className="text-2xl font-bold mb-4">Download Files</h1>
@@ -109,6 +140,9 @@ export function FileDownloader({ initialFiles }: { initialFiles: FileItem[] }) {
         >
           Download Selected Files
         </Button>
+        {isMobile && navigator.share && (
+          <Button onClick={shareImages}>Save Images</Button>
+        )}
       </div>
       <ScrollArea className="h-[400px] mt-4">
         <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-4">

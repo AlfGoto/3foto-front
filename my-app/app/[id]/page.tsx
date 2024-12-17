@@ -17,7 +17,6 @@ async function getFiles(id: string): Promise<FileItem[]> {
     throw new Error("Failed to fetch files");
   }
   const files: FileItem[] = await res.json();
-  console.log(files);
   return files;
 }
 

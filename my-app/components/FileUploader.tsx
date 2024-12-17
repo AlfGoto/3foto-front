@@ -23,7 +23,6 @@ interface FileUploaderProps {
 export function FileUploader({ apiUrl }: FileUploaderProps) {
   const [files, setFiles] = useState<FileItem[]>([]);
   const [isUploading, setIsUploading] = useState(false);
-  const [uploadResult, setUploadResult] = useState<string | null>(null);
   const [id, setId] = useState<string | null>(null);
   const [isCopied, setIsCopied] = useState(false);
 
@@ -46,7 +45,6 @@ export function FileUploader({ apiUrl }: FileUploaderProps) {
   const handleUpload = async () => {
     if (files.length === 0) return;
     setIsUploading(true);
-    setUploadResult(null);
     setId(null);
 
     try {
@@ -67,11 +65,9 @@ export function FileUploader({ apiUrl }: FileUploaderProps) {
       const result = await response.json();
       console.log(result);
       setId(result.id);
-      setUploadResult("Files uploaded successfully");
       setFiles([]);
     } catch (error) {
       console.error(error);
-      setUploadResult("Failed to upload files");
     } finally {
       setIsUploading(false);
     }
@@ -115,46 +111,49 @@ export function FileUploader({ apiUrl }: FileUploaderProps) {
           </Button>
         </div>
       </div>
-      {uploadResult && (
-        <p
-          className={`mt-4 text-sm ${
-            uploadResult.includes("Failed") ? "text-red-600" : "text-green-600"
-          }`}
-        >
-          {uploadResult}
-        </p>
-      )}
       {id && (
-        <div className="mt-4 p-4 bg-green-100 border border-green-300 rounded-md">
-          <p className="text-green-800 font-semibold mb-2">
-            Upload Successful!
-          </p>
-          <p className="text-sm text-green-700 mb-2">
-            Your files are available at:
-          </p>
-          <div className="flex items-center space-x-2">
-            <Input
-              value={`${window.location.href}${id}`}
-              readOnly
-              className="flex-grow text-sm"
-            />
-            <Button
-              onClick={copyToClipboard}
-              variant="outline"
-              size="icon"
-              className="flex-shrink-0"
-            >
-              {isCopied ? (
-                <Check className="h-4 w-4 text-green-500" />
-              ) : (
-                <Clipboard className="h-4 w-4" />
-              )}
-              <span className="sr-only">
-                {isCopied ? "Copied" : "Copy link"}
-              </span>
-            </Button>
+        <>
+          <div className="mt-4 p-4 bg-green-100 border border-green-300 rounded-md">
+            <p className="text-green-800 font-semibold mb-2">
+              Upload Successful!
+            </p>
+            <p className="text-sm text-green-700 mb-2">
+              Your files are available at:
+            </p>
+            <div className="flex items-center space-x-2">
+              <Input
+                value={`${window.location.href}${id}`}
+                readOnly
+                className="flex-grow text-sm"
+              />
+              <Button
+                onClick={copyToClipboard}
+                variant="outline"
+                size="icon"
+                className="flex-shrink-0"
+              >
+                {isCopied ? (
+                  <Check className="h-4 w-4 text-green-500" />
+                ) : (
+                  <Clipboard className="h-4 w-4" />
+                )}
+                <span className="sr-only">
+                  {isCopied ? "Copied" : "Copy link"}
+                </span>
+              </Button>
+            </div>
           </div>
-        </div>
+          <Button
+            onClick={() => {
+              location.reload();
+            }}
+            variant="outline"
+            size="icon"
+            className="w-fit px-[10px]"
+          >
+            Another Link ?
+          </Button>
+        </>
       )}
       <ScrollArea className="h-[300px] mt-4 sm:h-[400px] lg:h-[500px]">
         <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4">
