@@ -95,14 +95,17 @@ export function FileDownloader({ initialFiles }: { initialFiles: FileItem[] }) {
   }
 
   async function shareImages() {
-    const imageFiles = files
-      .filter((file) => file.type.startsWith("image/"))
-      .map(
-        (file) =>
-          new File([file as unknown as BlobPart], file.name, {
+    const imageFiles = await Promise.all(
+      files
+        .filter((file) => file.type.startsWith("image/"))
+        .map(async (file) => {
+          const blob = await fetch(file.url).then((r) => r.blob());
+          const blobPart = await blob.text();
+          new File([blobPart], file.name, {
             type: file.type,
-          })
-      );
+          });
+        })
+    );
 
     if (imageFiles.length === 0) {
       console.warn("No images to share.");
