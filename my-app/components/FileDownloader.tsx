@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { useRouter } from "next/navigation";
 import { Button } from "@/components/ui/button";
 import { Checkbox } from "@/components/ui/checkbox";
@@ -19,13 +19,17 @@ interface FileItem {
 
 export function FileDownloader({ initialFiles }: { initialFiles: FileItem[] }) {
   const [files] = useState<FileItem[]>(initialFiles);
-  const [selectedFiles, setSelectedFiles] = useState<string[]>([]);
+  const [selectedFiles, setSelectedFiles] = useState<number[]>([]);
   const [isDownloading, setIsDownloading] = useState(false);
   const router = useRouter();
 
-  const toggleFileSelection = (id: string) => {
+  useEffect(() => {
+    document.title = "3F DOWN";
+  }, []);
+
+  const toggleFileSelection = (index: number) => {
     setSelectedFiles((prev) =>
-      prev.includes(id) ? prev.filter((fileId) => fileId !== id) : [...prev, id]
+      prev.includes(index) ? prev.filter((i) => i !== index) : [...prev, index]
     );
   };
 
@@ -91,14 +95,14 @@ export function FileDownloader({ initialFiles }: { initialFiles: FileItem[] }) {
   return (
     <div className="max-w-4xl mx-auto mt-10 px-4">
       <h1 className="text-2xl font-bold mb-4">Download Files</h1>
-      <div className="space-y-4">
+      <div className="space-y-4 gap-5 flex items-end ">
         <Button onClick={() => downloadFolder(files)} disabled={isDownloading}>
           Download All Files
         </Button>
         <Button
           onClick={() =>
             downloadFolder(
-              files.filter((file) => selectedFiles.includes(file.id))
+              files.filter((file, index) => selectedFiles.includes(index))
             )
           }
           disabled={selectedFiles.length === 0 || isDownloading}
@@ -109,12 +113,16 @@ export function FileDownloader({ initialFiles }: { initialFiles: FileItem[] }) {
       <ScrollArea className="h-[400px] mt-4">
         <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-4">
           {files.map((file, index) => (
-            <Card key={file.name + index} className="relative">
+            <Card
+              key={file.name + index}
+              className="relative"
+              onClick={() => toggleFileSelection(index)}
+            >
               <CardContent className="p-4">
                 <Checkbox
                   id={`file-${file.id}`}
-                  checked={selectedFiles.includes(file.id)}
-                  onCheckedChange={() => toggleFileSelection(file.id)}
+                  checked={selectedFiles.includes(index)}
+                  onCheckedChange={() => toggleFileSelection(index)}
                   className="absolute top-2 right-2 z-10"
                 />
                 {file.type.startsWith("image/") ? (
