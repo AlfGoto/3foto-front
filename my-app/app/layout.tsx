@@ -15,6 +15,7 @@ export default function RootLayout({
 }) {
   return (
     <html lang="en">
+      <link rel="icon" href="/icon.png" type="image/png" />
       <body className={inter.className}>
         <main className="container mx-auto p-4">{children}</main>
       </body>
