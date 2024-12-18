@@ -87,6 +87,7 @@ export function FilePreview({ file, onRemove, formatSize }: FilePreviewProps) {
         <X className="h-4 w-4" />
         <span className="sr-only">Remove file</span>
       </Button>
+
       <CardContent className="p-4 flex flex-col h-full min-w-[50px]">
         {renderPreview()}
         <div className="mt-2 space-y-1">
