@@ -12,17 +12,16 @@ interface FileItem {
 }
 
 async function getFiles(id: string): Promise<FileItem[]> {
-  const res = await fetch(`${process.env.API}/${id}`);
+  const res = await fetch(`${process.env.API_TRANSFER}/${id}`);
   if (!res.ok) {
     throw new Error("Failed to fetch files");
   }
   const files: FileItem[] = await res.json();
-  console.log(files);
   return files;
 }
 
 export default async function Page({ params }: DownloadPageProps) {
-  const { id } = params;
+  const { id } = await params;
   const files = await getFiles(id);
   return <FileDownloader initialFiles={files} />;
 }

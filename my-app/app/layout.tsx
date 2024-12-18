@@ -4,7 +4,7 @@ import { Inter } from "next/font/google";
 const inter = Inter({ subsets: ["latin"] });
 
 export const metadata = {
-  title: "File Management System",
+  title: "3F",
   description: "A simple file upload and download application",
 };
 
@@ -14,10 +14,9 @@ export default function RootLayout({
   children: React.ReactNode;
 }) {
   return (
-    <html lang="en">
-      <link rel="icon" href="/icon.png" type="image/png" />
-      <body className={inter.className}>
-        <main className="container mx-auto p-4">{children}</main>
+    <html lang="en" className="h-full">
+      <body className={`${inter.className} flex min-h-full flex-col`}>
+        <main className="flex-1">{children}</main>
       </body>
     </html>
   );
