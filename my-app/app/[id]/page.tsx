@@ -12,7 +12,7 @@ interface FileItem {
 }
 
 async function getFiles(id: string): Promise<FileItem[]> {
-  const res = await fetch(`${process.env.API}/${id}`);
+  const res = await fetch(`${process.env.API_TRANSFER}/${id}`);
   if (!res.ok) {
     throw new Error("Failed to fetch files");
   }

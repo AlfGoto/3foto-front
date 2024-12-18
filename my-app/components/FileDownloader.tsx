@@ -5,7 +5,6 @@ import { useRouter } from "next/navigation";
 import { Button } from "@/components/ui/button";
 import { Checkbox } from "@/components/ui/checkbox";
 import { Card, CardContent } from "@/components/ui/card";
-import { ScrollArea } from "@/components/ui/scroll-area";
 import Image from "next/image";
 import { Loader2 } from "lucide-react";
 import JSZip from "jszip";
@@ -84,10 +83,12 @@ export function FileDownloader({ initialFiles }: { initialFiles: FileItem[] }) {
 
   if (isDownloading) {
     return (
-      <div className="flex flex-col items-center justify-center h-screen">
-        <Loader2 className="w-16 h-16 animate-spin mb-4" />
-        <h2 className="text-2xl font-bold mb-2">Downloading Files</h2>
-        <p className="text-gray-600">
+      <div className="flex flex-col items-center justify-center min-h-[50vh] py-12">
+        <Loader2 className="w-12 h-12 sm:w-16 sm:h-16 animate-spin mb-4" />
+        <h2 className="text-xl sm:text-2xl font-bold mb-2">
+          Downloading Files
+        </h2>
+        <p className="text-muted-foreground text-center">
           Please wait while your files are being prepared...
         </p>
       </div>
@@ -127,10 +128,14 @@ export function FileDownloader({ initialFiles }: { initialFiles: FileItem[] }) {
   }
 
   return (
-    <div className="max-w-4xl mx-auto mt-10 px-4">
+    <div className="w-full max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 py-4 sm:py-6 lg:py-8">
       <h1 className="text-2xl font-bold mb-4">Download Files</h1>
-      <div className="space-y-4 gap-5 flex items-end ">
-        <Button onClick={() => downloadFolder(files)} disabled={isDownloading}>
+      <div className="flex flex-col sm:flex-row gap-3 sm:items-center">
+        <Button
+          onClick={() => downloadFolder(files)}
+          disabled={isDownloading}
+          className="w-full sm:w-auto"
+        >
           Download All Files
         </Button>
         <Button
@@ -140,20 +145,25 @@ export function FileDownloader({ initialFiles }: { initialFiles: FileItem[] }) {
             )
           }
           disabled={selectedFiles.length === 0 || isDownloading}
+          className="w-full sm:w-auto"
         >
           Download Selected Files
         </Button>
         {isMobile &&
           navigator.share &&
           files.filter((file) => file.type.startsWith("image/")).length !==
-            0 && <Button onClick={shareImages}>Save Images</Button>}
+            0 && (
+            <Button onClick={shareImages} className="w-full sm:w-auto">
+              Save Images
+            </Button>
+          )}
       </div>
-      <ScrollArea className="h-[400px] mt-4">
-        <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-4">
+      <div className="mt-6">
+        <div className="grid grid-cols-1 min-[400px]:grid-cols-2 md:grid-cols-3 gap-4">
           {files.map((file, index) => (
             <Card
               key={file.name + index}
-              className="relative"
+              className="relative min-w-[50px]"
               onClick={() => toggleFileSelection(index)}
             >
               <CardContent className="p-4">
@@ -182,8 +192,11 @@ export function FileDownloader({ initialFiles }: { initialFiles: FileItem[] }) {
             </Card>
           ))}
         </div>
-      </ScrollArea>
-      <Button onClick={() => router.push("/")} className="mt-4">
+      </div>
+      <Button
+        onClick={() => router.push("/")}
+        className="mt-6 w-full sm:w-auto"
+      >
         Upload More Files
       </Button>
     </div>

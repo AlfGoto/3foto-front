@@ -5,7 +5,6 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Card, CardContent } from "@/components/ui/card";
-import { ScrollArea } from "@/components/ui/scroll-area";
 import { Clipboard, Check } from "lucide-react";
 import Image from "next/image";
 
@@ -87,10 +86,10 @@ export function FileUploader({ apiUrl }: FileUploaderProps) {
   };
 
   return (
-    <div className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8">
-      <div className="space-y-4 flex items-end sm:flex sm:space-y-0 sm:space-x-4">
-        <div className="w-full sm:w-2/3">
-          <Label htmlFor="file" className="block mb-1">
+    <div className="w-full max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 py-4 sm:py-6 lg:py-8">
+      <div className="flex flex-col sm:flex-row gap-4 sm:items-end">
+        <div className="flex-1">
+          <Label htmlFor="file" className="block mb-1.5">
             Choose files
           </Label>
           <Input
@@ -101,11 +100,11 @@ export function FileUploader({ apiUrl }: FileUploaderProps) {
             className="w-full"
           />
         </div>
-        <div className="w-full sm:w-1/3">
+        <div className="w-full sm:w-auto">
           <Button
             onClick={handleUpload}
             disabled={files.length === 0 || isUploading}
-            className="w-full"
+            className="w-full sm:w-auto min-w-[120px]"
           >
             {isUploading ? "Uploading..." : "Upload"}
           </Button>
@@ -113,7 +112,7 @@ export function FileUploader({ apiUrl }: FileUploaderProps) {
       </div>
       {id && (
         <>
-          <div className="mt-4 p-4 bg-green-100 border border-green-300 rounded-md">
+          <div className="mt-6 p-4 bg-green-100 border border-green-300 rounded-md">
             <p className="text-green-800 font-semibold mb-2">
               Upload Successful!
             </p>
@@ -149,19 +148,19 @@ export function FileUploader({ apiUrl }: FileUploaderProps) {
             }}
             variant="outline"
             size="icon"
-            className="w-fit px-[10px]"
+            className="mt-4 w-fit px-[10px]"
           >
             Another Link ?
           </Button>
         </>
       )}
-      <ScrollArea className="h-[300px] mt-4 sm:h-[400px] lg:h-[500px]">
-        <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4">
+      <div className="mt-6">
+        <div className="grid grid-cols-1 min-[400px]:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4">
           {files.map((file) => (
-            <Card key={file.id} className="h-full">
-              <CardContent className="p-4 flex flex-col h-full">
+            <Card key={file.id} className="h-full min-w-[50px]">
+              <CardContent className="p-4 flex flex-col h-full min-w-[50px]">
                 {file.type.startsWith("image/") ? (
-                  <div className="relative w-full h-32 sm:h-40 flex-grow">
+                  <div className="relative w-full h-32 sm:h-40 min-w-[50px]">
                     <Image
                       src={URL.createObjectURL(file.file)}
                       alt={file.name}
@@ -170,7 +169,7 @@ export function FileUploader({ apiUrl }: FileUploaderProps) {
                     />
                   </div>
                 ) : (
-                  <div className="w-full h-32 sm:h-40 bg-gray-200 flex items-center justify-center flex-grow">
+                  <div className="w-full h-32 sm:h-40 bg-gray-200 flex items-center justify-center min-w-[50px]">
                     <span className="text-gray-500 text-sm sm:text-base">
                       {file.type}
                     </span>
@@ -181,7 +180,7 @@ export function FileUploader({ apiUrl }: FileUploaderProps) {
             </Card>
           ))}
         </div>
-      </ScrollArea>
+      </div>
     </div>
   );
 }
