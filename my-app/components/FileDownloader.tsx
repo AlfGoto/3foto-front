@@ -20,12 +20,12 @@ export function FileDownloader({ initialFiles }: { initialFiles: FileItem[] }) {
   const [files] = useState<FileItem[]>(initialFiles);
   const [selectedFiles, setSelectedFiles] = useState<number[]>([]);
   const [isDownloading, setIsDownloading] = useState(false);
+  const [isMobile, setIsMobile] = useState(false);
   const router = useRouter();
-
-  const isMobile = /Mobi|Android|iPhone|iPad|iPod/i.test(navigator.userAgent);
 
   useEffect(() => {
     document.title = "3F DOWN";
+    setIsMobile(/Mobi|Android|iPhone|iPad|iPod/i.test(navigator.userAgent));
   }, []);
 
   const toggleFileSelection = (index: number) => {
