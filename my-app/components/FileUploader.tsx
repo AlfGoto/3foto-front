@@ -7,6 +7,7 @@ import { Upload, AlertCircle, Clipboard, Check } from "lucide-react";
 import { Alert, AlertDescription } from "@/components/ui/alert";
 import { FilePreview } from "./FilePreview";
 import { isTextFile, formatSize, readTextFile } from "./utils";
+import { useSession } from "next-auth/react";
 
 interface FileItem {
   id: string;
@@ -31,6 +32,8 @@ export function FileUploader({ apiUrl }: FileUploaderProps) {
   const [isCopied, setIsCopied] = useState(false);
   const [isDragging, setIsDragging] = useState(false);
   const [error, setError] = useState<string | null>(null);
+  const { data: session } = useSession();
+  console.log(session);
 
   const totalSize = files.reduce((acc, file) => acc + file.size, 0);
   const isOverLimit = totalSize > MAX_SIZE;
@@ -70,7 +73,7 @@ export function FileUploader({ apiUrl }: FileUploaderProps) {
       );
 
       if (newTotalSize > MAX_SIZE) {
-        setError("La taille totale des fichiers dépasse la limite de 2Go");
+        setError("The total file size exceeds the limit of 2Go");
       } else {
         setError(null);
       }
@@ -110,11 +113,9 @@ export function FileUploader({ apiUrl }: FileUploaderProps) {
         (acc, file) => acc + file.size,
         0
       );
-
       if (newTotalSize <= MAX_SIZE) {
         setError(null);
       }
-
       return updatedFiles;
     });
   };
@@ -131,6 +132,16 @@ export function FileUploader({ apiUrl }: FileUploaderProps) {
         formData.append(`files`, fileItem.file, fileItem.name);
       });
 
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
+      const user: any = session?.user;
+      if (user.id) {
+        const creatorId: string = user.id;
+        formData.append("creatorId", creatorId);
+      }
+      if (user.name) {
+        const creatorName: string = user.name;
+        formData.append("creatorName", creatorName);
+      }
       const response = await fetch(apiUrl, {
         method: "POST",
         body: formData,
@@ -144,7 +155,7 @@ export function FileUploader({ apiUrl }: FileUploaderProps) {
       setId(result.id);
       setFiles([]);
     } catch (error) {
-      setError("Échec de l'envoi des fichiers. Veuillez réessayer.");
+      setError("Failed to send files. Please try again.");
       console.error(error);
     } finally {
       setIsUploading(false);
@@ -180,7 +191,7 @@ export function FileUploader({ apiUrl }: FileUploaderProps) {
           <Upload className="h-8 w-8 text-muted-foreground" />
           <div className="flex flex-col items-center gap-1">
             <p className="text-sm text-muted-foreground text-center">
-              Glissez-déposez vos fichiers ici, ou cliquez pour sélectionner
+              Drag and drop your files here, or click to select
             </p>
             <Input
               id="file"
@@ -207,7 +218,7 @@ export function FileUploader({ apiUrl }: FileUploaderProps) {
               isOverLimit ? "text-destructive" : "text-muted-foreground"
             }`}
           >
-            Taille totale : {formatSize(totalSize)} / 2Go
+            Total size : {formatSize(totalSize)} / 2Go
           </p>
         </div>
         <div className="w-full sm:w-auto">
@@ -216,7 +227,7 @@ export function FileUploader({ apiUrl }: FileUploaderProps) {
             disabled={files.length === 0 || isUploading || isOverLimit}
             className="w-full sm:w-auto min-w-[120px]"
           >
-            {isUploading ? "Envoi..." : "Envoyer"}
+            {isUploading ? "Sending..." : "Send"}
           </Button>
         </div>
       </div>
@@ -226,7 +237,7 @@ export function FileUploader({ apiUrl }: FileUploaderProps) {
           <div className="mt-6 p-4 bg-green-100 border border-green-300 rounded-md">
             <p className="text-green-800 font-semibold mb-2">Envoi réussi !</p>
             <p className="text-sm text-green-700 mb-2">
-              Vos fichiers sont disponibles à :
+              Your files are available at :
             </p>
             <div className="flex items-center space-x-2">
               <Input
@@ -246,7 +257,7 @@ export function FileUploader({ apiUrl }: FileUploaderProps) {
                   <Clipboard className="h-4 w-4" />
                 )}
                 <span className="sr-only">
-                  {isCopied ? "Copié" : "Copier le lien"}
+                  {isCopied ? "Copied" : "Copy link"}
                 </span>
               </Button>
             </div>
@@ -259,7 +270,7 @@ export function FileUploader({ apiUrl }: FileUploaderProps) {
             size="icon"
             className="mt-4 w-fit px-[10px]"
           >
-            Un autre lien ?
+            Another link?
           </Button>
         </>
       )}
