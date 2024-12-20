@@ -33,7 +33,6 @@ export function FileUploader({ apiUrl }: FileUploaderProps) {
   const [isDragging, setIsDragging] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const { data: session } = useSession();
-  console.log(session);
 
   const totalSize = files.reduce((acc, file) => acc + file.size, 0);
   const isOverLimit = totalSize > MAX_SIZE;
@@ -134,13 +133,15 @@ export function FileUploader({ apiUrl }: FileUploaderProps) {
 
       // eslint-disable-next-line @typescript-eslint/no-explicit-any
       const user: any = session?.user;
-      if (user.id) {
-        const creatorId: string = user.id;
-        formData.append("creatorId", creatorId);
-      }
-      if (user.name) {
-        const creatorName: string = user.name;
-        formData.append("creatorName", creatorName);
+      if (user) {
+        if (user.id !== null && user.id !== undefined) {
+          const creatorId: string = user.id;
+          formData.append("creatorId", creatorId);
+        }
+        if (user.name !== null && user.name !== undefined) {
+          const creatorName: string = user.name;
+          formData.append("creatorName", creatorName);
+        }
       }
       const response = await fetch(apiUrl, {
         method: "POST",
