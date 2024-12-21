@@ -21,6 +21,7 @@ const handler = NextAuth({
     },
     async session({ session, token }) {
       session.user.id = token.id;
+      session.user.image = session.user.image.split("=")[0]
       return session;
     },
   },

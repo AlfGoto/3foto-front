@@ -1,11 +1,15 @@
 import "./globals.css";
 import { Inter } from "next/font/google";
 import { Header } from "@/components/Header";
+import { Providers } from "@/components/Providers";
 
 const inter = Inter({ subsets: ["latin"] });
 
 export const metadata = {
-  title: "3F",
+  title: {
+    template: "%s | 3F",
+    default: "3F-Transfer",
+  },
   description: "A simple file upload and download application",
 };
 
@@ -15,12 +19,14 @@ export default function RootLayout({
   children: React.ReactNode;
 }) {
   return (
-    <html lang="en" className="h-full">
-      <link rel="icon" href="/icon.png" type="image/png" />
-      <body className={`${inter.className} flex min-h-full flex-col`}>
-        <Header />
-        <main className="flex-1">{children}</main>
-      </body>
-    </html>
+    <Providers>
+      <html lang="en" className="h-full">
+        <link rel="icon" href="/icon.png" type="image/png" />
+        <body className={`${inter.className} flex min-h-full flex-col`}>
+          <Header />
+          <main className="flex-1">{children}</main>
+        </body>
+      </html>
+    </Providers>
   );
 }

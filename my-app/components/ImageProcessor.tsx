@@ -7,89 +7,25 @@ import { Upload, AlertCircle, ImageIcon, Camera } from "lucide-react";
 import { Alert, AlertDescription } from "@/components/ui/alert";
 import { Progress } from "@/components/ui/progress";
 import Img from "next/image";
-
-interface ImageItem {
-  id: string;
-  name: string;
-  originalSize: number;
-  processedSize: number;
-  preview: string | null;
-  processed: Blob | null;
-  original: Blob | null;
-  status: "pending" | "processing" | "processed" | "error";
-  error?: string;
-  isRaw: boolean;
-  progress: number;
-  hash: string; // For caching
-}
-
-const MAX_SIZE = 100 * 1024 * 1024; // 100MB per image
-const TARGET_HEIGHT = 720; // 720p
-
-// Standard image formats
-const STANDARD_FORMATS = [
-  "image/jpeg",
-  "image/png",
-  "image/webp",
-  "image/gif",
-  "image/bmp",
-  "image/tiff",
-];
-
-// Raw image extensions
-const RAW_EXTENSIONS = [
-  // "3fr", // Hasselblad
-  // "ari", // Arri Alexa
-  // "arw",
-  // "srf",
-  // "sr2", // Sony
-  // "bay", // Casio
-  // "braw", // Blackmagic
-  // "cri", // Cintel
-  // "crw",
-  "cr2",
-  "cr3", // Canon
-  // "cap",
-  // "iiq",
-  // "eip", // Phase One
-  // "dng", // Adobe
-  // "erf", // Epson
-  // "fff", // Hasselblad
-  // "mef", // Mamiya
-  // "mrw", // Minolta
-  // "nef",
-  // "nrw", // Nikon
-  // "orf", // Olympus
-  // "pef",
-  // "ptx", // Pentax
-  // "raf", // Fujifilm
-  // "raw",
-  // "rw2", // Panasonic
-  // "rwl",
-  // "dng", // Leica
-  // "x3f", // Sigma
-];
-
-const isRawFile = (file: File) => {
-  const extension = file.name.split(".").pop()?.toLowerCase() || "";
-  return RAW_EXTENSIONS.includes(extension);
-};
-
-const generateHash = async (file: File): Promise<string> => {
-  const buffer = await file.arrayBuffer();
-  const hashBuffer = await crypto.subtle.digest("SHA-256", buffer);
-  return Array.from(new Uint8Array(hashBuffer))
-    .map((b) => b.toString(16).padStart(2, "0"))
-    .join("");
-};
+import { MAX_SIZE, RAW_EXTENSIONS, STANDARD_FORMATS } from "@/lib/formats";
+import { ImageItem } from "@/lib/types";
+import {
+  createWebP,
+  extractJpegPreview,
+  formatSize,
+  generateHash,
+  isRawFile,
+} from "@/lib/utils";
+import { useSession } from "next-auth/react";
 
 export function ImageProcessor() {
   const [images, setImages] = useState<ImageItem[]>([]);
   const [isDragging, setIsDragging] = useState(false);
   const [error, setError] = useState<string | null>(null);
+  const { data: session } = useSession();
+  console.log(session);
 
   useEffect(() => {
-    console.log("images:", images);
     images.forEach(async (im) => {
       if (im.status === "pending") {
         const blob = await processImage(
@@ -107,7 +43,11 @@ export function ImageProcessor() {
         setImages((prev) =>
           prev.map((img) =>
             img.id === im.id
-              ? { ...img, processed: blob, preview: URL.createObjectURL(blob) }
+              ? {
+                  ...img,
+                  processed: blob,
+                  preview: URL.createObjectURL(blob as Blob),
+                }
               : img
           )
         );
@@ -121,7 +61,7 @@ export function ImageProcessor() {
       progress: number,
       status: "pending" | "processing" | "processed" | "error"
     ) => void
-  ): Promise<Blob> => {
+  ): Promise<Blob | null> => {
     if (isRawFile(file)) {
       const result = await extractJpegPreview(file, onProgress);
       return result;
@@ -266,7 +206,7 @@ export function ImageProcessor() {
                       src={img.preview}
                       alt={img.name}
                       fill
-                      sizes="(max-width: 400px) 100vw, (max-width: 768px) 50vw, 25vw"
+                      sizes="(max-width: 500px) 100vw, (max-width: 1000px) 50vw, 25vw"
                       className="rounded object-cover"
                       priority={false}
                     />
@@ -325,112 +265,4 @@ export function ImageProcessor() {
       </div>
     </div>
   );
-}
-
-function formatSize(bytes: number) {
-  if (bytes === 0) return "0 Bytes";
-  const k = 1024;
-  const sizes = ["Bytes", "KB", "MB"];
-  const i = Math.floor(Math.log(bytes) / Math.log(k));
-  return parseFloat((bytes / Math.pow(k, i)).toFixed(2)) + " " + sizes[i];
-}
-
-function extractJpegPreview(
-  file: File,
-  onProgress: (
-    progress: number,
-    status: "pending" | "processing" | "processed" | "error"
-  ) => void
-): Promise<Blob> {
-  return new Promise((resolve, reject) => {
-    const fileReader = new FileReader();
-
-    fileReader.onload = async (event: ProgressEvent<FileReader>) => {
-      const arrayBuffer = event.target?.result as ArrayBuffer;
-      const view = new DataView(arrayBuffer);
-
-      // Simplified search for JPEG marker (may not be 100% accurate)
-      const jpegMarker = new Uint8Array([0xff, 0xd8]); // JPEG start-of-image marker
-      let jpegStart = -1;
-
-      for (let i = 0; i < view.byteLength - 1; i++) {
-        if (
-          view.getUint8(i) === jpegMarker[0] &&
-          view.getUint8(i + 1) === jpegMarker[1]
-        ) {
-          jpegStart = i;
-          break;
-        }
-      }
-
-      if (jpegStart !== -1) {
-        const jpegData = arrayBuffer.slice(jpegStart);
-        const blob = new Blob([jpegData], { type: "image/jpeg" });
-        const webpBlob = await createWebP(
-          new File([blob], "jpgBlob"),
-          onProgress
-        );
-        resolve(webpBlob as Blob);
-      } else {
-        reject(new Error("No JPEG preview found in CR2 file."));
-      }
-    };
-
-    fileReader.onerror = (error: ErrorEvent) => {
-      reject(error);
-    };
-
-    fileReader.readAsArrayBuffer(file);
-  });
-}
-
-async function createWebP(
-  file: File,
-  onProgress: (
-    progress: number,
-    status: "pending" | "processing" | "processed" | "error"
-  ) => void
-) {
-  return new Promise((resolve, reject) => {
-    const img = new Image();
-    img.onload = () => {
-      try {
-        onProgress(0.3, "processing");
-        // Calculate new dimensions
-        const aspectRatio = img.width / img.height;
-        const newWidth = Math.round(TARGET_HEIGHT * aspectRatio);
-
-        // Create canvas
-        const canvas = document.createElement("canvas");
-        canvas.width = newWidth;
-        canvas.height = TARGET_HEIGHT;
-
-        // Draw image
-        const ctx = canvas.getContext("2d");
-        if (!ctx) throw new Error("Could not get canvas context");
-
-        ctx.drawImage(img, 0, 0, newWidth, TARGET_HEIGHT);
-        onProgress(0.7, "processing"); // 70% progress after resize
-
-        // Convert to WebP
-        canvas.toBlob(
-          (blob) => {
-            if (blob) {
-              onProgress(1, "processed"); // 100% progress
-              resolve(blob as Blob);
-            } else {
-              reject(new Error("Failed to create WebP"));
-            }
-          },
-          "image/webp",
-          0.8
-        );
-      } catch (err) {
-        reject(err);
-      }
-    };
-    img.onerror = () => reject(new Error("Failed to load image"));
-    img.src = URL.createObjectURL(file);
-    onProgress(0.3, "processing"); // 30% progress after loading starts
-  });
 }

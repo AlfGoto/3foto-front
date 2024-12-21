@@ -6,8 +6,8 @@ import { Input } from "@/components/ui/input";
 import { Upload, AlertCircle, Clipboard, Check } from "lucide-react";
 import { Alert, AlertDescription } from "@/components/ui/alert";
 import { FilePreview } from "./FilePreview";
-import { isTextFile, formatSize, readTextFile } from "./utils";
 import { useSession } from "next-auth/react";
+import { formatSize, isTextFile, readTextFile } from "@/lib/utils";
 
 interface FileItem {
   id: string;
