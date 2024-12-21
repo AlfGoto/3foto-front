@@ -13,6 +13,7 @@ import Image from "next/image";
 
 interface FilePreviewProps {
   file: {
+    file: Blob | MediaSource;
     id: string;
     name: string;
     type: string;

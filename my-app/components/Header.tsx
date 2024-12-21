@@ -41,7 +41,7 @@ export function Header() {
     return Math.abs(offset) * velocity;
   };
 
-  const paginate = (newDirection: number) => {
+  const paginate = () => {
     router.push(isDisplay ? "/" : "/display");
   };
 
@@ -50,7 +50,7 @@ export function Header() {
       <div className="container flex h-16 items-center justify-between px-8">
         <div
           className="relative flex items-center gap-2 cursor-pointer"
-          onClick={() => paginate(isDisplay ? -1 : 1)}
+          onClick={() => paginate()}
         >
           <div className="relative h-8 w-32 overflow-hidden">
             <AnimatePresence initial={false} custom={isDisplay ? 1 : -1}>
@@ -73,9 +73,9 @@ export function Header() {
                   const swipe = swipePower(offset.x, velocity.x);
 
                   if (swipe < -swipeConfidenceThreshold) {
-                    paginate(1);
+                    paginate();
                   } else if (swipe > swipeConfidenceThreshold) {
-                    paginate(-1);
+                    paginate();
                   }
                 }}
               >

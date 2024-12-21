@@ -18,12 +18,28 @@ import {
 } from "@/lib/utils";
 import { useSession } from "next-auth/react";
 
-export function ImageProcessor() {
+interface FileUploaderProps {
+  apiUrl: string;
+}
+
+export function ImageProcessor({ apiUrl }: FileUploaderProps) {
   const [images, setImages] = useState<ImageItem[]>([]);
   const [isDragging, setIsDragging] = useState(false);
   const [error, setError] = useState<string | null>(null);
+  const [isUploading, setIsUploading] = useState(false);
+  const [name, setName] = useState("");
   const { data: session } = useSession();
   console.log(session);
+
+  const totalSize = images.reduce(
+    (acc, file) => acc + Number(file?.processed?.size),
+    0
+  );
+  const isOverLimit = totalSize > MAX_SIZE;
+
+  useEffect(() => {
+    document.title = "3F DISPLAY";
+  }, []);
 
   useEffect(() => {
     images.forEach(async (im) => {
@@ -54,6 +70,42 @@ export function ImageProcessor() {
       }
     });
   }, [images]);
+
+  const handleUpload = async () => {
+    if (images.length === 0 || isOverLimit) return;
+    setIsUploading(true);
+    setError(null);
+
+    try {
+      const formData = new FormData();
+      if (!name) return;
+      formData.append("name", name);
+      images.forEach((image) => {
+        if (image.processed)
+          formData.append(`files`, image.processed, image.name);
+      });
+
+      const myHeaders = new Headers();
+      if (session?.token) myHeaders.append("credentials", session?.token);
+      const response = await fetch(apiUrl, {
+        method: "POST",
+        body: formData,
+        credentials: "include",
+        headers: myHeaders,
+      });
+
+      if (!response.ok) {
+        throw new Error("Upload failed");
+      }
+
+      setImages([]);
+    } catch (error) {
+      setError("Failed to send files. Please try again.");
+      console.error(error);
+    } finally {
+      setIsUploading(false);
+    }
+  };
 
   const processImage = async (
     file: File,
@@ -95,7 +147,6 @@ export function ImageProcessor() {
           id: crypto.randomUUID(),
           name: file.name,
           originalSize: file.size,
-          processedSize: 0,
           preview: null,
           processed: null,
           original: file,
@@ -191,6 +242,35 @@ export function ImageProcessor() {
           <AlertDescription>{error}</AlertDescription>
         </Alert>
       )}
+
+      <div className="flex flex-col sm:flex-row gap-4 sm:items-center mb-6">
+        <div className="flex-1">
+          <Input
+            type="text"
+            placeholder="Display Name"
+            onChange={(e) => setName(e.target.value)}
+            className="max-w-xs"
+          />
+        </div>
+        <div className="flex-1">
+          <p
+            className={`text-sm ${
+              isOverLimit ? "text-destructive" : "text-muted-foreground"
+            }`}
+          >
+            Total size : {formatSize(totalSize)} / 2Go
+          </p>
+        </div>
+        <div className="w-full sm:w-auto">
+          <Button
+            onClick={handleUpload}
+            disabled={images.length === 0 || isUploading || isOverLimit}
+            className="w-full sm:w-auto min-w-[120px]"
+          >
+            {isUploading ? "Sending..." : "Send"}
+          </Button>
+        </div>
+      </div>
 
       <div className="mt-6">
         <div className="grid grid-cols-1 min-[400px]:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4">

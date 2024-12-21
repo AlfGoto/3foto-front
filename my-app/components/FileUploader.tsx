@@ -131,21 +131,13 @@ export function FileUploader({ apiUrl }: FileUploaderProps) {
         formData.append(`files`, fileItem.file, fileItem.name);
       });
 
-      // eslint-disable-next-line @typescript-eslint/no-explicit-any
-      const user: any = session?.user;
-      if (user) {
-        if (user.id !== null && user.id !== undefined) {
-          const creatorId: string = user.id;
-          formData.append("creatorId", creatorId);
-        }
-        if (user.name !== null && user.name !== undefined) {
-          const creatorName: string = user.name;
-          formData.append("creatorName", creatorName);
-        }
-      }
+      const myHeaders = new Headers();
+      if (session?.token) myHeaders.append("credentials", session?.token);
       const response = await fetch(apiUrl, {
         method: "POST",
         body: formData,
+        credentials: "include",
+        headers: myHeaders,
       });
 
       if (!response.ok) {
@@ -165,7 +157,7 @@ export function FileUploader({ apiUrl }: FileUploaderProps) {
 
   const copyToClipboard = async () => {
     if (id) {
-      const linkToCopy = `${window.location.href}d/${id}`;
+      const linkToCopy = `${window.location.href}${id}`;
       try {
         await navigator.clipboard.writeText(linkToCopy);
         setIsCopied(true);
@@ -242,7 +234,7 @@ export function FileUploader({ apiUrl }: FileUploaderProps) {
             </p>
             <div className="flex items-center space-x-2">
               <Input
-                value={`${window.location.href}d/${id}`}
+                value={`${window.location.href}${id}`}
                 readOnly
                 className="flex-grow text-sm"
               />

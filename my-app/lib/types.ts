@@ -2,7 +2,6 @@ export interface ImageItem {
   id: string;
   name: string;
   originalSize: number;
-  processedSize: number;
   preview: string | null;
   processed: Blob | null;
   original: Blob | null;
