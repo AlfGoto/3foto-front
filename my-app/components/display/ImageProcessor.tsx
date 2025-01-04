@@ -3,7 +3,12 @@
 import { useCallback, useEffect, useState } from "react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
-import { Upload, AlertCircle, ImageIcon, Camera } from "lucide-react";
+import {
+  Upload,
+  AlertCircle,
+  ImageIcon,
+  Camera,
+} from "lucide-react";
 import { Alert, AlertDescription } from "@/components/ui/alert";
 import { Progress } from "@/components/ui/progress";
 import Img from "next/image";
@@ -17,6 +22,7 @@ import {
   isRawFile,
 } from "@/lib/utils";
 import { useSession } from "next-auth/react";
+import { AnotherDisplay } from "./Another-button";
 
 interface FileUploaderProps {
   apiUrl: string;
@@ -28,8 +34,9 @@ export function ImageProcessor({ apiUrl }: FileUploaderProps) {
   const [error, setError] = useState<string | null>(null);
   const [isUploading, setIsUploading] = useState(false);
   const [name, setName] = useState("");
+  const [indic, setIndic] = useState({ name: false });
+  const [id, setId] = useState<string | null>(null);
   const { data: session } = useSession();
-  console.log(session);
 
   const totalSize = images.reduce(
     (acc, file) => acc + Number(file?.processed?.size),
@@ -42,31 +49,49 @@ export function ImageProcessor({ apiUrl }: FileUploaderProps) {
   }, []);
 
   useEffect(() => {
+    if (indic.name) setIndic({ ...indic, name: false });
+  }, [name]);
+
+  useEffect(() => {
     images.forEach(async (im) => {
       if (im.status === "pending") {
-        const blob = await processImage(
-          im.original as File,
-          (progress, status) => {
-            setImages((prev) =>
-              prev.map((img) =>
-                img.id === im.id
-                  ? { ...img, status: status, progress: progress * 100 }
-                  : img
-              )
-            );
-          }
-        );
-        setImages((prev) =>
-          prev.map((img) =>
-            img.id === im.id
-              ? {
-                  ...img,
-                  processed: blob,
-                  preview: URL.createObjectURL(blob as Blob),
-                }
-              : img
-          )
-        );
+        try {
+          const blob = await processImage(
+            im.original as File,
+            (progress, status) => {
+              setImages((prev) =>
+                prev.map((img) =>
+                  img.id === im.id
+                    ? { ...img, status: status, progress: progress * 100 }
+                    : img
+                )
+              );
+            }
+          );
+          setImages((prev) =>
+            prev.map((img) =>
+              img.id === im.id
+                ? {
+                    ...img,
+                    processed: blob,
+                    preview: URL.createObjectURL(blob as Blob),
+                  }
+                : img
+            )
+          );
+        } catch (err) {
+          console.log("error", err);
+          setImages((prev) =>
+            prev.map((img) =>
+              img.id === im.id
+                ? {
+                    ...img,
+                    status: "error",
+                  }
+                : img
+            )
+          );
+        }
       }
     });
   }, [images]);
@@ -78,10 +103,10 @@ export function ImageProcessor({ apiUrl }: FileUploaderProps) {
 
     try {
       const formData = new FormData();
-      if (!name) return;
+      if (!name) return setIndic({ ...indic, name: true });
       formData.append("name", name);
       images.forEach((image) => {
-        if (image.processed)
+        if (image.processed && image.status !== "error")
           formData.append(`files`, image.processed, image.name);
       });
 
@@ -97,8 +122,11 @@ export function ImageProcessor({ apiUrl }: FileUploaderProps) {
       if (!response.ok) {
         throw new Error("Upload failed");
       }
+      const json = await response.json();
+      setId(json.id);
 
       setImages([]);
+      setName("");
     } catch (error) {
       setError("Failed to send files. Please try again.");
       console.error(error);
@@ -192,6 +220,8 @@ export function ImageProcessor({ apiUrl }: FileUploaderProps) {
     });
   }, []);
 
+  if (id) return <AnotherDisplay id={id} />;
+
   return (
     <div className="w-full max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 py-4 sm:py-6 lg:py-8">
       <div
@@ -249,7 +279,7 @@ export function ImageProcessor({ apiUrl }: FileUploaderProps) {
             type="text"
             placeholder="Display Name"
             onChange={(e) => setName(e.target.value)}
-            className="max-w-xs"
+            className={"max-w-xs " + (indic.name ? "border-[red]" : "")}
           />
         </div>
         <div className="flex-1">

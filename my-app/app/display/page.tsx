@@ -1,6 +1,6 @@
 "use client";
 
-import { ImageProcessor } from "@/components/ImageProcessor";
+import { ImageProcessor } from "@/components/display/ImageProcessor";
 import { SessionProvider } from "next-auth/react";
 
 export default function Home() {

@@ -1,4 +1,4 @@
-import { FileDownloader } from "@/components/FileDownloader";
+import { FileDownloader } from "@/components/transfer/FileDownloader";
 
 interface DownloadPageProps {
   params: { id: string };

@@ -126,7 +126,10 @@ export async function createWebP(
         reject(err);
       }
     };
-    img.onerror = () => reject(new Error("Failed to load image"));
+    img.onerror = () => {
+      onProgress(0, "error");
+      reject(new Error("Failed to load image"));
+    };
     img.src = URL.createObjectURL(file);
     onProgress(0.3, "processing"); // 30% progress after loading starts
   });

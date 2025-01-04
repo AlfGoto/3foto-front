@@ -22,9 +22,11 @@ export default function RootLayout({
     <Providers>
       <html lang="en" className="h-full">
         <link rel="icon" href="/icon.png" type="image/png" />
-        <body className={`${inter.className} flex min-h-full flex-col`}>
+        <body
+          className={`${inter.className} flex min-h-full flex-col w-full`}
+        >
           <Header />
-          <main className="flex-1">{children}</main>
+          <main className="flex-1 w-full flex">{children}</main>
         </body>
       </html>
     </Providers>

@@ -11,3 +11,20 @@ export interface ImageItem {
   progress: number;
   hash: string; // For caching
 }
+export interface File {
+  id: string;
+  url: string;
+  name: string;
+}
+
+export interface CreatorViewProps {
+  id: string;
+  files: string[];
+  API_URL: string;
+}
+
+export interface UserViewProps {
+  id: string;
+  files: File[];
+  API_URL: string;
+}

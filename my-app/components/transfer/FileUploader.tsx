@@ -5,7 +5,7 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Upload, AlertCircle, Clipboard, Check } from "lucide-react";
 import { Alert, AlertDescription } from "@/components/ui/alert";
-import { FilePreview } from "./FilePreview";
+import { FilePreview } from "../transfer/FilePreview";
 import { useSession } from "next-auth/react";
 import { formatSize, isTextFile, readTextFile } from "@/lib/utils";
 

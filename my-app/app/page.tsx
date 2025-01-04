@@ -1,7 +1,7 @@
 "use client";
 
 import { SessionProvider } from "next-auth/react";
-import { FileUploader } from "../components/FileUploader";
+import { FileUploader } from "../components/transfer/FileUploader";
 
 export default function Home() {
   return (
