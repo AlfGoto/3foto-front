@@ -93,16 +93,13 @@ export async function createWebP(
     img.onload = () => {
       try {
         onProgress(0.3, "processing");
-        // Calculate new dimensions
         const aspectRatio = img.width / img.height;
         const newWidth = Math.round(TARGET_HEIGHT * aspectRatio);
 
-        // Create canvas
         const canvas = document.createElement("canvas");
         canvas.width = newWidth;
         canvas.height = TARGET_HEIGHT;
 
-        // Draw image
         const ctx = canvas.getContext("2d");
         if (!ctx) throw new Error("Could not get canvas context");
 

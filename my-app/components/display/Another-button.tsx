@@ -9,7 +9,7 @@ export function AnotherDisplay({ id }: { id: string }) {
   const [isCopied, setIsCopied] = useState(false);
   const copyToClipboard = async () => {
     if (id) {
-      const linkToCopy = `${window.location.href}${id}`;
+      const linkToCopy = `${window.location.origin}/display/${id}`;
       try {
         await navigator.clipboard.writeText(linkToCopy);
         setIsCopied(true);

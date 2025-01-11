@@ -10,12 +10,12 @@ import { Alert, AlertDescription } from "@/components/ui/alert";
 
 export function UserView({ id, files, API_URL }: UserViewProps) {
   const router = useRouter();
-  const [selectedFiles, setSelectedFiles] = useState<string[]>([]);
+  const [selectedFiles, setSelectedFiles] = useState<number[]>([]);
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [success, setSuccess] = useState<string | null>(null);
 
-  async function submitSelectedFiles(id: string, selectedFiles: string[]) {
+  async function submitSelectedFiles(id: string, selectedFiles: number[]) {
     const response = await fetch(`${API_URL}/submit-files/${id}`, {
       method: "POST",
       headers: {
@@ -31,11 +31,11 @@ export function UserView({ id, files, API_URL }: UserViewProps) {
     return await response.json();
   }
 
-  const handleSelectFile = (fileId: string) => {
+  const handleSelectFile = (fileIndex: number) => {
     setSelectedFiles((prev) =>
-      prev.includes(fileId)
-        ? prev.filter((id) => id !== fileId)
-        : [...prev, fileId]
+      prev.includes(fileIndex)
+        ? prev.filter((id) => id !== fileIndex)
+        : [...prev, fileIndex]
     );
   };
 
@@ -46,7 +46,7 @@ export function UserView({ id, files, API_URL }: UserViewProps) {
       await submitSelectedFiles(id, selectedFiles);
       setSuccess("Files submitted successfully");
       router.refresh();
-    // eslint-disable-next-line @typescript-eslint/no-unused-vars
+      // eslint-disable-next-line @typescript-eslint/no-unused-vars
     } catch (err) {
       setError("Failed to submit files");
     } finally {
@@ -58,16 +58,16 @@ export function UserView({ id, files, API_URL }: UserViewProps) {
     <div className="w-full max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 py-4 sm:py-6 lg:py-8">
       <h1 className="text-2xl font-bold mb-4">Select Files</h1>
       <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4">
-        {files.map((file) => (
+        {files.map((file, index) => (
           <Card
             key={file.id}
             className={`cursor-pointer ${
-              selectedFiles.includes(file.id) ? "ring-2 ring-primary" : ""
+              selectedFiles.includes(index) ? "ring-2 ring-primary" : ""
             }`}
-            onClick={() => handleSelectFile(file.id)}
+            onClick={() => handleSelectFile(index)}
           >
-            <CardContent className="p-4">
-              <div className="aspect-square relative mb-2">
+            <CardContent className="p-1">
+              <div className="aspect-square relative">
                 <Image
                   src={file.url}
                   alt={file.name}
